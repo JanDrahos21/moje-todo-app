@@ -2,48 +2,58 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>To do Listator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List - Organizátor úkolů</title>
   <link rel="stylesheet" href="stylator.css">
 </head>
 <body>
-<!-- Hlavička -->
 <header>
-  <h1>To do Listator</h1>
-  <p>Taj nejlapsi listina daleko a siroko</p>
+  <h1>Tajný nejlepší listina daleko a široko</h1>
+  <p>Organizuj své úkoly jako profesionál</p>
 </header>
 
-<!-- Formulář pro přidání úkolu -->
 <main>
+  <!-- Formulář pro přidání úkolu -->
   <form id="todo-form">
-    <input type="text" id="task-input" placeholder="Dělaj, hazaj semhle... ">
-
-
-    <div id="task-counter">Máš 0 na účtu, šlapačko</div>
-
-    <div class="categories-container">
-      <div id="prace-column" class="category-column">
-        <h3>Práce</h3>
-        <ul class="category-list"></ul>
-      </div>
-      <div id="zivot-column" class="category-column">
-        <h3>Život</h3>
-        <ul class="category-list"></ul>
-      </div>
-      <div id="skola-column" class="category-column">
-        <h3>Škola, cože? Ty ještě chodíš do školy??</h3>
-        <ul class="category-list"></ul>
-      </div>
+    <div class="form-row">
+      <input
+              type="text"
+              id="task-input"
+              placeholder="hajzle, čišti mrdko"
+              required
+      >
+      <select id="category-select">
+        <option value="prace">Práce</option>
+        <option value="zivot">Život</option>
+        <option value="skola">Škola</option>
+      </select>
     </div>
-
     <button type="submit">Pridaj mi na ruku</button>
   </form>
 
+  <!-- Počítadlo úkolů -->
+  <div id="task-counter">Máš 0 na účtu, šlapačko</div>
 
+  <!-- Kontejner pro kategorie -->
+  <div class="categories-container">
+    <!-- Sloupec Práce -->
+    <div class="category-column" id="prace-column">
+      <h3>Práce</h3>
+      <ul class="category-list"></ul>
+    </div>
 
-  <!-- Seznam úkolů -->
-  <ul id="todo-list">
-    <!-- Zde budou úkoly přidávané JavaScriptem -->
-  </ul>
+    <!-- Sloupec Život -->
+    <div class="category-column" id="zivot-column">
+      <h3>Život</h3>
+      <ul class="category-list"></ul>
+    </div>
+
+    <!-- Sloupec Škola -->
+    <div class="category-column" id="skola-column">
+      <h3>Škola, cože? Ty ještě chodíš do školy??</h3>
+      <ul class="category-list"></ul>
+    </div>
+  </div>
 </main>
 
 <script src="script.js"></script>
