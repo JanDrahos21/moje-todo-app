@@ -8,108 +8,105 @@ const categorySelect = document.getElementById('category-select');
 
 let tasks = [];
 
-
-
 function displayDeleteButton(listItem) {
   const button = document.createElement('button');
   button.textContent = 'Smažko';
-    button.addEventListener('click', function() {
-      // 1. Najdi index úkolu
-      const taskText = listItem.querySelector('.task-text').textContent;
-      const taskIndex = tasks.findIndex(function(task) {
-        return task.text === taskText;
-      });
-
-      // 2. Smaž z array
-      tasks.splice(taskIndex, 1);  // ✅ Správná syntax!
-
-      // 3. Smaž z DOM
-      listItem.remove();
-
-      // 4. Ulož změny
-      saveTasksToLocalStorage();
-      updateTaskCounter();
+  button.addEventListener('click', function() {
+    // 1. Najdi index úkolu
+    const taskText = listItem.querySelector('.task-text').textContent;
+    const taskIndex = tasks.findIndex(function(task) {
+      return task.text === taskText;
     });
 
+    // 2. Smaž z array (pouze pokud úkol existuje)
+    if (taskIndex !== -1) {
+      tasks.splice(taskIndex, 1);
+    }
 
+    // 3. Smaž z DOM
+    listItem.remove();
+
+    // 4. Ulož změny
+    saveTasksToLocalStorage();
+    updateTaskCounter();
+  });
 
   return button;
-
 }
 
 function loadTasksFromLocalStorage() {
   // 1. Načti data
   const storedData = localStorage.getItem('todoTasks');
 
-// 2. Zkontroluj existence
+  // 2. Zkontroluj existence
   if (storedData !== null) {
-
     // 3. Převeď zpět na array
     const loadedTasks = JSON.parse(storedData);
 
     // 4. Nastav globální tasks
     tasks = loadedTasks;
-    todoList.innerHTML = '';
 
-    // 5. Zobraz každý úkol
+    // 5. Vyčisti všechny sloupce (ne jen todoList)
+    praceColumn.innerHTML = '';
+    zivotColumn.innerHTML = '';
+    skolaColumn.innerHTML = '';
+
+    // 6. Zobraz každý úkol
     for (let task of tasks) {
-      displayTask(task.text, task.category);  // jen text, ne celý objekt
+      displayTask(task.text, task.category);
 
-
-    // Pokud byl úkol dokončený, aplikuj styling
-    if (task.completed === true) {
-      const lastTask = todoList.lastElementChild;
-      lastTask.style.textDecoration = 'line-through';
-      lastTask.style.color = 'black';
-    }}
+      // Pokud byl úkol dokončený, aplikuj styling
+      if (task.completed === true) {
+        const targetColumn = getColumnByCategory(task.category);
+        const lastTask = targetColumn.lastElementChild;
+        if (lastTask) {
+          lastTask.classList.add('completed'); // Použij CSS třídu místo inline stylů
+        }
+      }
+    }
   }
-
 }
-
 
 function saveTasksToLocalStorage() {
   localStorage.setItem('todoTasks', JSON.stringify(tasks));
-
-
-
 }
-
 
 function displayCompleteButton(listItem) {
   const button = document.createElement('button');
   button.textContent = 'Vyhotoveno';
   button.addEventListener('click', function() {
-    listItem.style.textDecoration = 'line-through';
-    listItem.style.color = 'black';
+    // Použij CSS třídu místo inline stylů
+    listItem.classList.add('completed');
 
     const taskText = listItem.querySelector('.task-text').textContent;
     const taskIndex = tasks.findIndex(function(task) {
       return task.text === taskText;
     });
-    tasks[taskIndex].completed = true;
-    saveTasksToLocalStorage();
-    updateTaskCounter();
 
-
+    if (taskIndex !== -1) {
+      tasks[taskIndex].completed = true;
+      saveTasksToLocalStorage();
+      updateTaskCounter();
+    }
   });
 
   return button;
-
-
 }
 
 function updateTaskCounter() {
-  const allTasks = document.querySelectorAll('li');  // ← Všechny li v dokumentu
+  // ❌ CHYBA: Počítáš všechny <li> v dokumentu!
+  // ✅ OPRAVA: Počítej jen úkoly v kategoriích
+  const allTasks = document.querySelectorAll('.category-list li');
   let uncompletedCount = 0;
 
   for (let task of allTasks) {
-    if (task.style.textDecoration !== 'line-through') {
+    // Používej CSS třídu místo inline stylů
+    if (!task.classList.contains('completed')) {
       uncompletedCount++;
     }
   }
   document.getElementById('task-counter').textContent = `Máš ${uncompletedCount} na účtu, šlapačko`;
 }
-
 
 function displayTask(taskText, taskCategory) {
   console.log("=== CREATING TASK:", taskText, "===");
@@ -122,18 +119,19 @@ function displayTask(taskText, taskCategory) {
   textSpan.textContent = taskText;
   textSpan.className = 'task-text';
   listItem.appendChild(textSpan);
+
   const completeBtn = displayCompleteButton(listItem);
   const deleteBtn = displayDeleteButton(listItem);
 
-  // Přidej ho do <ul>
+  // Přidej tlačítka
   listItem.appendChild(completeBtn);
   listItem.appendChild(deleteBtn);
 
+  // Přidej do správného sloupce
   const targetColumn = getColumnByCategory(taskCategory);
   targetColumn.appendChild(listItem);
 
-
-
+  // Double-click editace
   listItem.addEventListener('dblclick', function() {
     console.log("🎯 DOUBLECLICK TRIGGERED");
 
@@ -143,42 +141,39 @@ function displayTask(taskText, taskCategory) {
     const input = document.createElement('input');
     input.value = originalText;
     input.type = 'text';
-    input.className = 'task-text';
+    input.className = 'task-input'; // Změň třídu pro správný styling
 
     // Nahraď span inputem
     listItem.replaceChild(input, textSpan);
     input.focus();
 
+    // Funkce pro dokončení editace
+    function finishEdit(newText) {
+      const newSpan = document.createElement('span');
+      newSpan.textContent = newText || originalText;
+      newSpan.className = 'task-text';
+      listItem.replaceChild(newSpan, input);
+
+      // Aktualizuj v tasks array
+      const taskIndex = tasks.findIndex(task => task.text === originalText);
+      if (taskIndex !== -1 && newText && newText !== originalText) {
+        tasks[taskIndex].text = newText;
+        saveTasksToLocalStorage();
+      }
+    }
+
     input.addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
-        if (input.value.trim() === '') {
-          // Prázdný text → vrať původní
-          listItem.childNodes[0].textContent = originalText;
-        } else {
-          // Neprázdný → ulož nový
-          listItem.childNodes[0].textContent = input.value;
-        }
-        input.remove();
-
-
+        finishEdit(input.value.trim());
       } else if (event.key === 'Escape') {
-        const newSpan = document.createElement('span');
-        newSpan.textContent = originalText;
-        newSpan.className = 'task-text';
-        listItem.replaceChild(newSpan, input);
+        finishEdit(originalText);
       }
     });
 
     input.addEventListener('blur', function() {
-      const newSpan = document.createElement('span');
-      newSpan.textContent = input.value;
-      newSpan.className = 'task-text';
-      listItem.replaceChild(newSpan, input);
+      finishEdit(input.value.trim());
     });
   });
-
-
-
 
   console.log("Doubleclick listener added successfully!");
 }
@@ -196,12 +191,11 @@ function getColumnByCategory(taskCategory) {
   }
 }
 
-
 function handleSubmit(event) {
   event.preventDefault();
-  const taskText = taskInput.value;
+  const taskText = taskInput.value.trim(); // Přidej .trim()
 
-  if (taskText.trim() === '') {
+  if (taskText === '') {
     console.log("Empty task - not adding");
     return;
   }
@@ -213,10 +207,10 @@ function handleSubmit(event) {
     category: categorySelect.value
   };
 
-  tasks.push(taskObject);  // ✅ Ulož objekt místo stringu
+  tasks.push(taskObject);
   taskInput.value = '';
   displayTask(taskText, taskObject.category);
-  saveTasksToLocalStorage()
+  saveTasksToLocalStorage(); // Přidej chybějící středník
 
   updateTaskCounter();
   console.log("All tasks:", tasks);
@@ -232,6 +226,9 @@ console.log("DOM elements found:");
 console.log("- todoList:", todoList);
 console.log("- taskInput:", taskInput);
 console.log("- todoForm:", todoForm);
+console.log("- praceColumn:", praceColumn);
+console.log("- zivotColumn:", zivotColumn);
+console.log("- skolaColumn:", skolaColumn);
 
 // Na konec kódu (za debug informace)
 loadTasksFromLocalStorage();
