@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>To do Listator</title>
+  <link rel="stylesheet" href="stylator.css">
+</head>
+<body>
+<!-- Hlavička -->
+<header>
+  <h1>To do Listator</h1>
+  <p>Taj nejlapsi listina daleko a siroko</p>
+</header>
+
+<!-- Formulář pro přidání úkolu -->
+<main>
+  <form id="todo-form">
+    <input type="text" id="task-input" placeholder="Dělaj, hazaj semhle... ">
+
+
+    <div id="task-counter">Máš 0 na účtu, šlapačko</div>
+
+    <div class="categories-container">
+      <div id="prace-column" class="category-column">
+        <h3>Práce</h3>
+        <ul class="category-list"></ul>
+      </div>
+      <div id="zivot-column" class="category-column">
+        <h3>Život</h3>
+        <ul class="category-list"></ul>
+      </div>
+      <div id="skola-column" class="category-column">
+        <h3>Škola, cože? Ty ještě chodíš do školy??</h3>
+        <ul class="category-list"></ul>
+      </div>
+    </div>
+
+    <button type="submit">Pridaj mi na ruku</button>
+  </form>
+
+
+
+  <!-- Seznam úkolů -->
+  <ul id="todo-list">
+    <!-- Zde budou úkoly přidávané JavaScriptem -->
+  </ul>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
